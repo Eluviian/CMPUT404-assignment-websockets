@@ -113,7 +113,7 @@ def read_ws(ws,client):
         print(message)
         for key, value in message.items():
             myWorld.set(key, value)
-        data = ws.recieve()
+        data = ws.receive()
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
