@@ -37,6 +37,12 @@ var H = canvas.height = window.innerHeight-50;
 var wscounter = 0;
 var socket;
 var multipleClients = true;
+var startNewLine = true;
+var prev_x;
+var prev_y;
+var x;
+var y;
+
 
 function setMultipleClients() {
     multipleClients = !multipleClients
@@ -68,9 +74,41 @@ function drawCircle(context,entity) {
     }
 }
 
+function drawLine(context,entity) {
+    console.log("drawline");
+    with(context){
+        
+        x = entity["x"];
+        y = entity["y"];
+        if (x === undefined){
+            return;
+        }
+        if (y === undefined){
+            return;
+        }
+        beginPath();
+        conole.log(startNewLine);
+        
+        if (startNewLine){
+            startNewLine = false;
+            prev_x = x - 1;
+            prev_y = y - 1;
+        } else {
+            console.log(x,y,prev_x,prev_y);
+        }
+        lineWidth = 5;
+        strokeStyle = entity["colour"]
+        moveTo(prev_x,prev_y);
+        lineTo(x,y);
+        stroke();
+        prev_x = x;
+        prev_y = y;
+    }
+}
+
 function prepEntity(entity) {
     if (multipleClients){
-        entity["colour"] = "FF0000";
+        entity["colour"] = "rebeccapurple";
     }
     if (!entity["colour"]) {
         entity["colour"] = "#FF0000";
@@ -95,7 +133,7 @@ function renderFrame() {
     clearFrame();
     for (var key in world) {
         var entity = world[key];
-        drawCircle(context,prepEntity(entity));
+        drawLine(context,prepEntity(entity));
     }
 }
 
@@ -252,6 +290,9 @@ mouse.mousedowners.push(function(x,y,clicked,e) {
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    startNewLine = true;
+    prev_x = x;
+    prev_y = y;
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
@@ -295,6 +336,7 @@ wsSetup();
 
 // 30 frames per second
 setInterval( update, 1000/30.0);
+//setInterval(update,1000);
 
 
     </script>
