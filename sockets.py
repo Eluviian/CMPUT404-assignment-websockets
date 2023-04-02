@@ -90,7 +90,6 @@ def set_listener( entity, data ):
     msg = json.dumps({entity: data})
     send_all(msg)
 
-myWorld.add_set_listener(set_listener)
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
@@ -103,7 +102,7 @@ myWorld.add_set_listener( set_listener )
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return redirect('static/index.html')
+    return redirect('static/index.html',code=302)
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
