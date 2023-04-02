@@ -27,7 +27,8 @@
     <canvas id="c" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
 
     <script>
-      // Fix me
+// used for reference: https://github.com/aaronskiba/CMPUT404-assignment-websockets/blob/master/sockets.py
+
 var canvas = document.getElementById('c');
 var host = window.location.host;
 var context = canvas.getContext("2d");
@@ -35,6 +36,14 @@ var W = canvas.width  = window.innerWidth-6;
 var H = canvas.height = window.innerHeight-50;
 var wscounter = 0;
 var socket;
+var multipleClients = true;
+
+function setMultipleClients() {
+    multipleClients = !multipleClients
+    if (multipleClients){
+        drawNextFrame();
+    }
+}
 
 function debug(str) {
     var debugDiv = document.getElementById('debug');
@@ -60,6 +69,9 @@ function drawCircle(context,entity) {
 }
 
 function prepEntity(entity) {
+    if (multipleClients){
+        entity["colour"] = "FF0000";
+    }
     if (!entity["colour"]) {
         entity["colour"] = "#FF0000";
     }
@@ -98,7 +110,7 @@ function drawNextFrame() {
 function drawFrame() {
     if (drawNext) {
         renderFrame();
-        drawNext = false;
+        drawNext = multipleClients;
     }
 }
 
@@ -123,8 +135,12 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    drawNextFrame(); 
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    if (socket.readyState === socket.OPEN){
+        console.log("sending data in addEntity");
+        socket.send(JSON.stringify(world));
+    }
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -253,7 +269,7 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
-        //XXX: TODO What are you going to do here?
+        console.log("onopen success")
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +277,11 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            data = JSON.parse(msg.data);
+            for (let i in data){
+                world[i] = data[i]
+            }
+            drawNextFrame();
         } catch (e) {
             alert("socket on message: " + e);
         }
